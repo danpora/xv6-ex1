@@ -6,6 +6,23 @@
 #include "defs.h"
 #include "x86.h"
 #include "elf.h"
+#include "syscall.h"
+#include "traps.h"
+
+/***************************************************/
+/* assembly function to push exit syscall to stack */
+/***************************************************/
+
+void
+exitf()
+{
+  asm volatile ("push %eax;");
+  asm volatile ("pop 4(%esp);");
+  asm volatile ("movl %0 , %%eax" : : "i" (SYS_exit));
+  asm volatile ("int %0" : : "i" (T_SYSCALL));
+}
+
+/***************************************************/
 
 int
 exec(char *path, char **argv)
@@ -16,6 +33,8 @@ exec(char *path, char **argv)
   struct elfhdr elf;
   struct inode *ip;
   struct proghdr ph;
+  /* exit syscall size (byte) */
+  int exitsz = (int)exec - (int)exitf;
   pde_t *pgdir, *oldpgdir;
 
   begin_op();
@@ -75,11 +94,18 @@ exec(char *path, char **argv)
       goto bad;
     ustack[3+argc] = sp;
   }
+  /* stack pointer update */
+  sp = sz - exitsz;
+  /* copy page from sp to exitf */
+  copyout(pgdir,sp,exitf,exitsz);
+
   ustack[3+argc] = 0;
 
-  ustack[0] = 0xffffffff;  // fake return PC
+  /* return address of user space program */
+  ustack[0] = sz - exitsz;  // fake return PC
   ustack[1] = argc;
   ustack[2] = sp - (argc+1)*4;  // argv pointer
+
 
   sp -= (3+argc+1) * 4;
   if(copyout(pgdir, sp, ustack, (3+argc+1)*4) < 0)
