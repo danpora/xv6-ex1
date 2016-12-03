@@ -441,3 +441,67 @@ sys_pipe(void)
   fd[1] = fd1;
   return 0;
 }
+
+
+
+//__________Set func___________________________________
+int sys_set(void)
+{
+
+  char *path;
+  char *dirs;
+  char *pDirs;
+  int numOfDirs=0;
+   int numOfChars=0;
+
+
+cprintf("1");
+ if(argstr(0, &path) < 0){
+	cprintf("111");
+     return -1;
+}
+
+cprintf("2");
+ if(argstr(1, &dirs) < 0){
+	cprintf("222");
+     return -2;
+}
+
+for(int i =0;i<10;i++){    //reset the global arg
+   gPath[i][0]='\0';		
+}
+
+ pDirs=dirs;
+ //cprintf("  pDirs %s ", pDirs); 
+ while(*pDirs != '\0'  ){    //'\0' is the end of a string
+ //cprintf("while 1 "); 
+   while (*pDirs != ':'){
+   //cprintf("while 2 \n");
+   //cprintf("pDirs2 %s\n ", pDirs);  
+     gPath[numOfDirs][numOfChars]=*pDirs;
+     numOfChars++;
+     pDirs++;
+    
+   }	
+   pDirs++;  //skip the ':'
+   //cprintf("  gPath %s ", pDirs);
+   gPath[numOfDirs][numOfChars]='\0';
+   numOfDirs++;
+   numOfChars=0;
+ } 
+
+
+for(int i =0;i<10;i++){
+    cprintf("\n");
+    cprintf("gPath: %s ",gPath[i]);
+}
+ 
+
+
+ cprintf("  Path %s ", path);   //"sysFile_set got:" + 
+ //cprintf("  Dir: %s ", dirs);
+ return 0;
+}
+
+
+

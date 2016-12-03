@@ -24,6 +24,7 @@ exitf()
 
 /***************************************************/
 
+
 int
 exec(char *path, char **argv)
 {
@@ -33,18 +34,57 @@ exec(char *path, char **argv)
   struct elfhdr elf;
   struct inode *ip;
   struct proghdr ph;
-  /* exit syscall size (byte) */
+    /* exit syscall size (byte) */
   int exitsz = (int)exec - (int)exitf;
   pde_t *pgdir, *oldpgdir;
 
-  begin_op();
 
+char newOpPath[1024]={'\0'};
+int j;
+begin_op();
+int n=0;
+int Failed=0;
+int found=0;
+
+
+while(n<10 && found==0){
+  for(j=0;j<strlen(gPath[n]);j++){
+    newOpPath[j]=(gPath[n])[j];
+
+  } 
+  for(int k=j;(k-j)<strlen(path);k++){
+      newOpPath[k]=path[k-j];
+  }   
+
+  if((ip = namei(newOpPath)) == 0){  //operate failed
+     Failed++;
+  }
+  else{
+    found=1;
+   }	
+  n++;
+}
+ if(Failed==10){   //failed 10 times
+    end_op();
+    return -1;
+}
+  ilock(ip);
+  pgdir = 0;
+
+ 
+
+/*
+  begin_op();
   if((ip = namei(path)) == 0){
+     cprintf("  in line 43 exec ip= %s  path=%s ",ip, path); 
     end_op();
     return -1;
   }
+
   ilock(ip);
   pgdir = 0;
+*/
+
 
   // Check ELF header
   if(readi(ip, (char*)&elf, 0, sizeof(elf)) < sizeof(elf))
@@ -94,7 +134,7 @@ exec(char *path, char **argv)
       goto bad;
     ustack[3+argc] = sp;
   }
-  /* stack pointer update */
+    /* stack pointer update */
   sp = sz - exitsz;
   /* copy page from sp to exitf */
   copyout(pgdir,sp,exitf,exitsz);
@@ -105,7 +145,6 @@ exec(char *path, char **argv)
   ustack[0] = sz - exitsz;  // fake return PC
   ustack[1] = argc;
   ustack[2] = sp - (argc+1)*4;  // argv pointer
-
 
   sp -= (3+argc+1) * 4;
   if(copyout(pgdir, sp, ustack, (3+argc+1)*4) < 0)

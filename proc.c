@@ -15,6 +15,7 @@ struct {
 static struct proc *initproc;
 
 int nextpid = 1;
+char gPath[10][1000];   //global arg to save the new path received
 extern void forkret(void);
 extern void trapret(void);
 
@@ -182,12 +183,11 @@ fork(void)
 
 // Exit the current process.  Does not return.
 // An exited process remains in the zombie state
-// until its parent calls wait() to find out it exited.
-
+// until its parent calls wait(0) to find out it exited.
 void
 exit(int status)
 {
-  cprintf(" %d\n", status);
+  cprintf("my_test program returs %d\n", status);
   struct proc *p;
   int fd;
 
@@ -209,7 +209,7 @@ exit(int status)
 
   acquire(&ptable.lock);
 
-  // Parent might be sleeping in wait().
+  // Parent might be sleeping in wait(0).
   wakeup1(proc->parent);
 
   // Pass abandoned children to init.
@@ -232,6 +232,7 @@ exit(int status)
 int
 wait(int *status)
 {
+  cprintf("sys_wait returns status: %d\n", *status);
   struct proc *p;
   int havekids, pid;
 

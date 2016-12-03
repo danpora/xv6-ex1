@@ -23,10 +23,13 @@ sys_exit(void)
   return 0;  // not reached
 }
 
+/* new version of sys_wait */
 int
 sys_wait(void)
 {
-  return wait(0);
+  int *status;
+  argptr(0,(char **)&status, 4);
+  return wait(status);
 }
 
 int

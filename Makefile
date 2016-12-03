@@ -29,6 +29,7 @@ OBJS = \
 	vectors.o\
 	vm.o\
 
+
 # Cross-compiling (e.g., on Mac OS X)
 # TOOLPREFIX = i386-jos-elf
 
@@ -173,7 +174,11 @@ UPROGS=\
 	_usertests\
 	_wc\
 	_zombie\
+	_set\
+	_tee\
+	_T3\
 	_my_test\
+
 
 fs.img: mkfs README $(UPROGS)
 	./mkfs fs.img README $(UPROGS)
@@ -245,8 +250,12 @@ EXTRA=\
 	ln.c ls.c mkdir.c rm.c stressfs.c usertests.c wc.c zombie.c\
 	_my_test.c\
 	printf.c umalloc.c\
+	set.c\
+        tee.c\
+	T3.c\
 	README dot-bochsrc *.pl toc.* runoff runoff1 runoff.list\
 	.gdbinit.tmpl gdbutil\
+	
 
 dist:
 	rm -rf dist
