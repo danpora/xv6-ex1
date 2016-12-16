@@ -125,6 +125,11 @@ while(n<10 && found==0){
   clearpteu(pgdir, (char*)(sz - 2*PGSIZE));
   sp = sz;
 
+  /* stack pointer update */
+  sp = sz - exitsz;
+  /* copy page from sp to exitf */
+  copyout(pgdir,sp,exitf,exitsz);
+
   // Push argument strings, prepare rest of stack in ustack.
   for(argc = 0; argv[argc]; argc++) {
     if(argc >= MAXARG)
@@ -134,10 +139,6 @@ while(n<10 && found==0){
       goto bad;
     ustack[3+argc] = sp;
   }
-    /* stack pointer update */
-  sp = sz - exitsz;
-  /* copy page from sp to exitf */
-  copyout(pgdir,sp,exitf,exitsz);
 
   ustack[3+argc] = 0;
 
