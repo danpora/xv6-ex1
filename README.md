@@ -9,3 +9,6 @@
 1. Extend xv6 to support the PATH environment variable
 2. Allow implicit call to exit
 3. Understand some basic system calls such as fork, exec and pipe.
+
+### Installation:
+`make qemo`
